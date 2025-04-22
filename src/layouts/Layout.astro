@@ -1,0 +1,71 @@
+---
+//import Header from "../components/Header.astro";
+import Footer from "astro-ui-lib/Footer";
+import BaseHead from "../components/BaseHead.astro";
+import { config } from "../../config";
+import HeaderFixed from "astro-ui-lib/HeaderFixed";
+
+const { title, description, heroImage } = Astro.props;
+---
+
+<html lang="es">
+    <head>
+        <BaseHead title={title} description={description} />
+    </head>
+
+    <body class="bg-white text-black">
+        <HeaderFixed
+            id="main-header"
+            class="bg-white"
+            navLinks={[
+                {
+                    href: "/",
+                    text: "Home",
+                    navLinkClass: "hover:text-blue-600",
+                },
+                {
+                    href: "/blog",
+                    text: "Blog",
+                    navLinkClass: "hover:text-blue-600",
+                },
+                {
+                    href: "/about",
+                    text: "About",
+                    navLinkClass: "hover:text-blue-600",
+                },
+            ]}
+           brand={{
+			href: "#hero",
+			id: "brand-logo",
+			class: "hover:opacity-80",
+			src: config.brandHeaderSrc,
+			alt: config.brandAlt,
+			classImage: "h-10 w-auto"
+		}}
+        />
+
+        <main class="max-w-5xl mx-auto px-4 py-12">
+            {
+                heroImage && (
+                    <div class="hero-image mb-8">
+                        <img
+                            src={heroImage}
+                            alt={title}
+                            class="w-full rounded-xl shadow-md"
+                        />
+                    </div>
+                )
+            }
+            <section>
+                <slot />
+                <!-- ✅ Esto sí muestra tu Hero1 -->
+            </section>
+        </main>
+        <Footer
+            imageSrc={config.brandFooterSrc}
+            legend={config.siteLegend}
+            copyright={`© ${new Date().getFullYear()} ${config.site}`}
+            author={`Creado por ${config.author}`}
+        />
+    </body>
+</html>
