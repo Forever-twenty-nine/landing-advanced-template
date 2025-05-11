@@ -15,7 +15,6 @@
     "@forever-twenty-nine/astro-ui-lib": "^0.2.3",
     "@tailwindcss/vite": "^4.1.4",
     "astro": "^5.7.4",
-    "astro-ui-lib": "file:../astro-ui-lib",
     "tailwindcss": "^4.1.4"
   }
 }
