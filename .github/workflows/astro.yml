@@ -1,42 +1,32 @@
 name: Deploy Astro site to Pages
 
-# 🚀 Este workflow se ejecuta al hacer push a la rama master o manualmente desde GitHub Actions.
 on:
   push:
     branches: ["master"]
   workflow_dispatch:
 
-# 🔐 Permisos necesarios para publicar en GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 🔁 Previene despliegues simultáneos que podrían entrar en conflicto
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
-# 🌍 Variables de entorno compartidas
 env:
-  BUILD_PATH: "."  # Ruta base del proyecto
+  BUILD_PATH: "."  # Carpeta base del proyecto
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      # 📥 Clona el repositorio completo
+      # 📥 Clona el repositorio
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 🔐 Autenticación para acceder a GitHub Packages y descargar la librería privada
-      - name: Authenticate with GitHub Packages
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "@forever-twenty-nine:registry=https://npm.pkg.github.com" >> ~/.npmrc
-
-      # 🔍 Detecta qué gestor de paquetes se está utilizando (npm o yarn)
+      # 🔍 Detecta si usás npm o yarn y define comandos a usar
       - name: Detect package manager
         id: detect-package-manager
         run: |
@@ -48,7 +38,7 @@ jobs:
             exit 0
           elif [ -f "${{ github.workspace }}/package.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT   # ⚠️ Usamos `install` en lugar de `ci`
+            echo "command=install" >> $GITHUB_OUTPUT  # <- No usamos `ci` para evitar errores con tokens
             echo "runner=npx --no-install" >> $GITHUB_OUTPUT
             echo "lockfile=package-lock.json" >> $GITHUB_OUTPUT
             exit 0
@@ -57,7 +47,7 @@ jobs:
             exit 1
           fi
 
-      # 🧱 Prepara Node.js y activa el cache para dependencias
+      # 🧱 Prepara Node y cache para dependencias
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -70,12 +60,18 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
-      # 📦 Instala las dependencias del proyecto, incluyendo la librería privada
+      # 🔐 Autenticación con GitHub Packages (después de detectar gestor)
+      - name: Authenticate with GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "@forever-twenty-nine:registry=https://npm.pkg.github.com" >> ~/.npmrc
+
+      # 📦 Instalación de dependencias (incluye tu librería privada)
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
         working-directory: ${{ env.BUILD_PATH }}
 
-      # 🏗 Compila el sitio Astro para producción
+      # 🏗 Construcción del sitio con Astro
       - name: Build with Astro
         run: |
           ${{ steps.detect-package-manager.outputs.runner }} astro build \
@@ -83,14 +79,14 @@ jobs:
             --base "${{ steps.pages.outputs.base_path }}"
         working-directory: ${{ env.BUILD_PATH }}
 
-      # ☁️ Sube el contenido generado en `dist/` para que GitHub Pages lo despliegue
+      # ☁️ Subida de artefactos (contenido compilado)
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ env.BUILD_PATH }}/dist
 
+  # 🚀 Publicación en GitHub Pages
   deploy:
-    # 🌐 Define el entorno para GitHub Pages y despliega el sitio
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
