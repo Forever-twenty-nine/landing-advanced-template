@@ -15,12 +15,11 @@ const navLinks = [
     {
         href: "/blog",
         text: "Blog",
-    },
-    {
-        href: "/about",
-        text: "About",
-    },
+    }
 ];
+
+import Logo from "../assets/brand.svg";
+import LogoFooter from "../assets/brand-negative.svg";
 ---
 
 <html lang="es">
@@ -37,7 +36,7 @@ const navLinks = [
                 href: "#hero",
                 id: "brand-logo",
                 class: "hover:opacity-80",
-                src: config.brandHeaderSrc,
+                src: Logo,
                 alt: config.brandAlt,
                 classImage: "h-10 w-auto",
             }}
@@ -61,7 +60,7 @@ const navLinks = [
             </section>
         </main>
         <Footer
-            imageSrc={config.brandFooterSrc}
+            imageSrc={LogoFooter}
             legend={config.siteLegend}
             copyright={`© ${new Date().getFullYear()} ${config.site}`}
             author={`Creado por ${config.author}`}
